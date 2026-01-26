@@ -57,22 +57,17 @@ export default class HoverSelectExtension extends Extension {
 
         const win = this._lastHoveredMetaWindow;
 
-        // schedule activation ASAP so the exit animation targets the chosen window
+        // activate immediately so the exit animation targets the chosen window
         if (win) {
           if (this._activateSource) {
             GLib.source_remove(this._activateSource);
             this._activateSource = 0;
           }
 
-          this._activateSource = GLib.idle_add(GLib.PRIORITY_DEFAULT, () => {
-            this._activateSource = 0;
-
-            const focused = global.display.get_focus_window?.();
-            if (focused && focused === win) return GLib.SOURCE_REMOVE;
-
+          const focused = global.display.get_focus_window?.();
+          if (!focused || focused !== win) {
             win.activate(global.get_current_time());
-            return GLib.SOURCE_REMOVE;
-          });
+          }
         }
       })
     );
